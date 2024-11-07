@@ -75,8 +75,8 @@ impl<'a> FixedScrollbar<'a> {
     }
 }
 
-impl<'a> Widget for FixedScrollbar<'a> {
-    fn ui(mut self, ui: &mut Ui) -> Response {
+impl Widget for FixedScrollbar<'_> {
+    fn ui(self, ui: &mut Ui) -> Response {
         let available_height = ui.available_height();
 
         let (rect, response) = ui.allocate_exact_size(
@@ -170,7 +170,7 @@ mod tests {
             .handle_height(30.0);
 
         assert_eq!(scrollbar.scroll_sensitivity, 0.2);
-        assert_eq!(scrollbar.scroll_smoothing, false);
+        assert!(!scrollbar.scroll_smoothing);
         assert_eq!(scrollbar.handle_height, 30.0);
     }
 
