@@ -30,7 +30,7 @@ impl Default for MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // 1. Side Panel Scrollbar
-        FixedScrollbar::new(&mut self.side_panel_scroll, 20.0)
+        FixedScrollbar::new(&mut self.side_panel_scroll)
             .show_in_side_panel(ctx, "Side Panel Scrollbar");
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -48,17 +48,17 @@ impl eframe::App for MyApp {
             ui.add_space(20.0);
 
             // 2. Floating Scrollbar
-            let scrollbar = FixedScrollbar::new(&mut self.floating_scroll, 20.0);
+            let scrollbar = FixedScrollbar::new(&mut self.floating_scroll);
             scrollbar.show_floating(ui, egui::pos2(100.0, 200.0));
 
             // 3. Docked Scrollbar
             let area = egui::Rect::from_min_size(egui::pos2(100.0, 300.0), egui::vec2(200.0, 20.0));
-            let scrollbar = FixedScrollbar::new(&mut self.docked_scroll, 20.0);
+            let scrollbar = FixedScrollbar::new(&mut self.docked_scroll);
             scrollbar.show_docked(ui, area);
 
             // 4. Direct UI Scrollbar
             ui.add_space(40.0);
-            ui.add(FixedScrollbar::new(&mut self.direct_scroll, 20.0));
+            ui.add(FixedScrollbar::new(&mut self.direct_scroll));
         });
     }
 }

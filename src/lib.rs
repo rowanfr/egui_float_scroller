@@ -3,18 +3,18 @@ use eframe::egui::{self, Context, Response, Sense, Ui, Widget};
 /// A fixed-size scrollbar that mutates an f32 value between 0.0 and 1.0
 pub struct FixedScrollbar<'a> {
     value: &'a mut f32,
-    width: f32,
+    bar_width: f32,
     handle_height: f32,
     scroll_sensitivity: f32,
     scroll_smoothing: bool,
 }
 
 impl<'a> FixedScrollbar<'a> {
-    pub fn new(value: &'a mut f32, width: f32) -> Self {
+    pub fn new(value: &'a mut f32) -> Self {
         *value = value.clamp(0.0, 1.0);
         Self {
             value,
-            width,
+            bar_width: 20.0,
             handle_height: 50.0,
             scroll_sensitivity: 0.1,
             scroll_smoothing: true,
@@ -36,11 +36,16 @@ impl<'a> FixedScrollbar<'a> {
         self
     }
 
+    pub fn bar_width(mut self, bar_width: f32) -> Self {
+        self.bar_width = bar_width;
+        self
+    }
+
     /// Shows the scrollbar in a right-aligned side panel with sensible defaults
     pub fn show_in_side_panel(self, ctx: &Context, title: impl Into<String>) {
         egui::SidePanel::right(title.into())
             .resizable(false)
-            .max_width(self.width)
+            .max_width(self.bar_width)
             .frame(egui::Frame::none())
             .show(ctx, |ui| {
                 ui.add(self);
@@ -61,8 +66,8 @@ impl<'a> FixedScrollbar<'a> {
     /// Shows the scrollbar docked to the right of a specified area
     pub fn show_docked(self, ui: &mut Ui, area: egui::Rect) {
         let scroll_rect = egui::Rect::from_min_size(
-            egui::pos2(area.max.x - self.width, area.min.y),
-            egui::vec2(self.width, area.height()),
+            egui::pos2(area.max.x - self.bar_width, area.min.y),
+            egui::vec2(self.bar_width, area.height()),
         );
 
         let area = egui::Area::new("docked_scrollbar".into())
@@ -80,7 +85,7 @@ impl Widget for FixedScrollbar<'_> {
         let available_height = ui.available_height();
 
         let (rect, response) = ui.allocate_exact_size(
-            egui::vec2(self.width, available_height),
+            egui::vec2(self.bar_width, available_height),
             Sense::click_and_drag(),
         );
 
@@ -105,7 +110,7 @@ impl Widget for FixedScrollbar<'_> {
 
         // Draw the background
         ui.painter().rect_filled(
-            egui::Rect::from_min_size(rect.min, egui::vec2(self.width, rect.height())),
+            egui::Rect::from_min_size(rect.min, egui::vec2(self.bar_width, rect.height())),
             0.0,
             ui.style().visuals.extreme_bg_color,
         );
@@ -117,7 +122,7 @@ impl Widget for FixedScrollbar<'_> {
         ui.painter().rect_filled(
             egui::Rect::from_min_size(
                 egui::pos2(rect.min.x, handle_y),
-                egui::vec2(self.width, handle_height),
+                egui::vec2(self.bar_width, handle_height),
             ),
             0.0,
             ui.style().visuals.widgets.active.bg_fill,
@@ -156,22 +161,24 @@ mod tests {
     #[test]
     fn test_scrollbar_creation() {
         let mut value = 0.5;
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0);
-        assert_eq!(scrollbar.width, 20.0);
+        let scrollbar = FixedScrollbar::new(&mut value);
+        assert_eq!(scrollbar.bar_width, 20.0);
         assert_eq!(*scrollbar.value, 0.5);
     }
 
     #[test]
     fn test_scrollbar_builder() {
         let mut value = 0.5;
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0)
+        let scrollbar = FixedScrollbar::new(&mut value)
             .scroll_sensitivity(0.2)
             .scroll_smoothing(false)
-            .handle_height(30.0);
+            .handle_height(30.0)
+            .bar_width(30.0);
 
         assert_eq!(scrollbar.scroll_sensitivity, 0.2);
         assert!(!scrollbar.scroll_smoothing);
         assert_eq!(scrollbar.handle_height, 30.0);
+        assert_eq!(scrollbar.bar_width, 30.0)
     }
 
     #[test]
@@ -180,14 +187,14 @@ mod tests {
         let mut ui = test_ui(&ctx);
 
         let mut value = 2.0; // Start with an out-of-bounds value
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0);
+        let scrollbar = FixedScrollbar::new(&mut value);
         ui.add(scrollbar);
 
         // Value should be clamped to 1.0
         assert!(value <= 1.0);
 
         let mut value = -1.0;
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0);
+        let scrollbar = FixedScrollbar::new(&mut value);
         ui.add(scrollbar);
 
         // Value should be clamped to 0.0
@@ -199,7 +206,7 @@ mod tests {
         let ctx = test_context();
 
         let mut value = 0.5;
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0);
+        let scrollbar = FixedScrollbar::new(&mut value);
 
         // This should not panic
         scrollbar.show_in_side_panel(&ctx, "test_panel");
@@ -211,7 +218,7 @@ mod tests {
         let mut ui = test_ui(&ctx);
 
         let mut value = 0.5;
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0);
+        let scrollbar = FixedScrollbar::new(&mut value);
 
         // This should not panic
         scrollbar.show_floating(&mut ui, egui::pos2(100.0, 100.0));
@@ -223,7 +230,7 @@ mod tests {
         let mut ui = test_ui(&ctx);
 
         let mut value = 0.5;
-        let scrollbar = FixedScrollbar::new(&mut value, 20.0);
+        let scrollbar = FixedScrollbar::new(&mut value);
 
         let area = ui.available_rect_before_wrap();
         // This should not panic

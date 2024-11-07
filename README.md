@@ -20,6 +20,8 @@ Basic usage:
 ```rust
 use egui_fixed_scrollbar::FixedScrollbar;
 
+let scrollbar = FixedScrollbar::new(0.0);
+
 // As a side panel:
 scrollbar.show_in_side_panel(ctx, "my_scrollbar");
 

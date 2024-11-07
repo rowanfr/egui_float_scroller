@@ -1,6 +1,6 @@
 [package]
 name = "egui_float_scroller"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Rowan Fraser"]
 description = "A fixed-size scrollbar widget for egui"
